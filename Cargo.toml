@@ -1,9 +1,21 @@
 [package]
 name = "zero2prod"
 version = "0.1.0"
+authors = ["crazyoptimist <hey@crazyoptimist.net>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# We can use any path, but below is the community convention
+# We can give any name to the lib, but it will default to package.name if missing
+[lib]
+path = "src/lib.rs"
+
+# We can have only one library in a project, and multiple binaries. That's why below is an array
+[[bin]]
+path = "src/main.rs"
+name = "zero2prod"
 
 [dependencies]
 actix-web = "4"
+
+[dev-dependencies]
+reqwest = "0.12.2"
