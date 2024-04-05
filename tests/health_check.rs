@@ -4,7 +4,7 @@ use std::net::TcpListener;
 use actix_web::rt::spawn;
 use reqwest::Client;
 
-use zero2prod::run;
+use zero2prod::startup::run;
 
 /// Spin up an instance of our application
 /// and returns its address (i.e. http://localhost:XXXX)
