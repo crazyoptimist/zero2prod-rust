@@ -1,10 +1,9 @@
-use std::net::TcpListener;
-
-// Why use a separate crate for http client? For decoupling!
 use actix_web::rt::spawn;
 use reqwest::Client;
+use sqlx::{Connection, PgConnection};
+use std::net::TcpListener;
 
-use zero2prod::startup::run;
+use zero2prod::{configuration::Settings, startup::run};
 
 /// Spin up an instance of our application
 /// and returns its address (i.e. http://localhost:XXXX)
@@ -38,6 +37,13 @@ async fn health_check_works() {
 #[actix_web::test]
 async fn subscribe_returns_200_for_valid_form_data() {
     let app_address = spawn_app();
+    let configuration = Settings::new().expect("Failed to read configuration");
+    let connection_string = configuration.database.connection_string();
+
+    let _connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgres.");
+
     let client = Client::new();
 
     let body = "name=le%20guin&email=le_guin%40gmail.com";
