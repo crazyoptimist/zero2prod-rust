@@ -3,5 +3,5 @@ database:
   host: "127.0.0.1"
   port: 5432
   username: "superuser"
-  password: "password"
+  password: "youmayneverguess"
   database_name: "newsletter"
