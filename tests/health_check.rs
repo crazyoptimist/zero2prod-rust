@@ -1,9 +1,13 @@
 use actix_web::rt::spawn;
 use reqwest::Client;
-use sqlx::{Connection, PgConnection, PgPool};
+use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
+use uuid::Uuid;
 
-use zero2prod::{configuration::Settings, startup::run};
+use zero2prod::{
+    configuration::{DatabaseSettings, Settings},
+    startup::run,
+};
 
 pub struct TestApp {
     pub address: String,
@@ -16,10 +20,11 @@ async fn spawn_app() -> TestApp {
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
 
-    let configuration = Settings::new().expect("Failed to read configuration.");
-    let connection_pool = PgPool::connect(&configuration.database.connection_string())
-        .await
-        .expect("Failed to connect to Postgres.");
+    let mut configuration = Settings::new().expect("Failed to read configuration.");
+    // Create a random database for test isolation
+    configuration.database.database_name = Uuid::new_v4().to_string();
+
+    let connection_pool = configure_database(&configuration.database).await;
 
     let server = run(listener, connection_pool.clone()).expect("Failed to listen");
     // Run it as a background task, because it should not block the test
@@ -28,6 +33,30 @@ async fn spawn_app() -> TestApp {
         address,
         connection_pool,
     }
+}
+
+pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+    // To use connect() function, you must import sqlx::Connection trait
+    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+        .await
+        .expect("Failed to connect to Postgres");
+
+    // To use execute() method, you must import sqlx::Executor trait
+    connection
+        .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .await
+        .expect("Failed to create database.");
+
+    let connection_pool = PgPool::connect(&config.connection_string())
+        .await
+        .expect("Failed to connect to Postgres.");
+
+    sqlx::migrate!("./migrations")
+        .run(&connection_pool)
+        .await
+        .expect("Failed to migrate the database");
+
+    connection_pool
 }
 
 #[actix_web::test]
