@@ -11,17 +11,16 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    <<: &postgres_service
-      # Service containers to run with the `test` container job
-      services:
-        postgres:
-          image: postgres:16
-          env:
-            POSTGRES_USER: superuser
-            POSTGRES_PASSWORD: youmayneverguess
-            POSTGRES_DB: postgres
-          ports:
-            - 5432:5432
+    # Service containers to run with the `test` container job
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: superuser
+          POSTGRES_PASSWORD: youmayneverguess
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -69,7 +68,15 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
-    <<: *postgres_service
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: superuser
+          POSTGRES_PASSWORD: youmayneverguess
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -97,7 +104,15 @@ jobs:
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
-    <<: *postgres_service
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: superuser
+          POSTGRES_PASSWORD: youmayneverguess
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
