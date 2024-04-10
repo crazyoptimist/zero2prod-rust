@@ -7,7 +7,7 @@ This is a project from Zero To Production In Rust.
 Install sqlx-cli
 
 ```bash
-cargo install sqlx-cli --no-default-features --features postgres
+cargo install sqlx-cli --no-default-features --features native-tls,postgres
 ```
 
 Create a database

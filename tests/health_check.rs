@@ -40,13 +40,13 @@ async fn subscribe_returns_200_for_valid_form_data() {
     let configuration = Settings::new().expect("Failed to read configuration");
     let connection_string = configuration.database.connection_string();
 
-    let _connection = PgConnection::connect(&connection_string)
+    let mut connection = PgConnection::connect(&connection_string)
         .await
         .expect("Failed to connect to Postgres.");
 
     let client = Client::new();
 
-    let body = "name=le%20guin&email=le_guin%40gmail.com";
+    let body = "name=optimistic%20snail&email=optimistic_snail%40gmail.com";
     let response = client
         .post(&format!("{}/subscriptions", &app_address))
         .header("Content-Type", "application/x-www-form-urlencoded")
@@ -56,6 +56,13 @@ async fn subscribe_returns_200_for_valid_form_data() {
         .expect("Failed to execute request");
 
     assert_eq!(200, response.status().as_u16());
+
+    let saved = sqlx::query!("SELECT email, name FROM subscriptions",)
+        .fetch_one(&mut connection)
+        .await
+        .expect("Failed to fetch saved subscription.");
+    assert_eq!(saved.name, "optimistic snail");
+    assert_eq!(saved.email, "optimistic_snail@gmail.com");
 }
 
 #[actix_web::test]
