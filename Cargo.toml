@@ -18,6 +18,8 @@ name = "zero2prod"
 actix-web = "4"
 serde = { version = "1", features = ["derive"] }
 config = { version = "0.14.0", features = ["yaml"] }
+uuid = { version = "1.8.0", features = ["v4"] }
+chrono = "0.4.37"
 
 # Using toml table syntax allows us to avoid super long lines
 [dependencies.sqlx]
