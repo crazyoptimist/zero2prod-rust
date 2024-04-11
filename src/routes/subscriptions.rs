@@ -2,6 +2,7 @@ use actix_web::{web, HttpResponse, Responder};
 use chrono::Utc;
 use serde::Deserialize;
 use sqlx::PgPool;
+use tracing::Instrument;
 use uuid::Uuid;
 
 #[derive(Deserialize)]
@@ -19,6 +20,8 @@ pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> im
         subscriber_name = %form.name,
     );
     let _request_span_guard = request_span.enter();
+
+    let query_span = tracing::info_span!("Saving new subscriber details in the database");
     match sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, email, name, subscribed_at)
@@ -33,6 +36,7 @@ pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> im
     // Getting &mut Connection is more complex and not scalable
     // hence we use connection pool
     .execute(pool.get_ref())
+    .instrument(query_span)
     .await
     {
         Ok(_) => HttpResponse::Ok().finish(),
