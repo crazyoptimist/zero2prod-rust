@@ -45,14 +45,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install postgresql-client -y
 
-      - name: Check sqlx offline mode data is up-to-date
-        run: |
-          cargo sqlx prepare --workspace --check
-
       - name: Migrate database
         run: |
           sqlx database create
           sqlx migrate run
+
+      - name: Check sqlx offline mode data is up-to-date
+        run: |
+          cargo sqlx prepare --workspace --check
 
       - name: Run tests
         run: cargo test
