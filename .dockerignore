@@ -1,0 +1,8 @@
+.git
+.github
+deployments
+target
+tests
+.gitignore
+Makefile
+README.md
